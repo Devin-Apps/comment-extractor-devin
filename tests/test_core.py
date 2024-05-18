@@ -45,5 +45,24 @@ class TestExtractComments(unittest.TestCase):
         with self.assertRaises(ValueError):
             extract_comments_from_file('test_files/test_unsupported.lang')
 
+    # New test cases for complex comment scenarios
+    def test_nested_comments(self):
+        # Test extraction of nested comments
+        nested_comments = extract_comments_from_file('test_files/test_nested_comments.js')
+        self.assertIn("/* Nested comment start", nested_comments)
+        self.assertIn("End of nested comment */", nested_comments)
+
+    def test_special_characters_in_comments(self):
+        # Test extraction of comments with special characters
+        special_char_comments = extract_comments_from_file('test_files/test_special_chars.py')
+        self.assertIn("# Comment with special characters !@#$%^&*()", special_char_comments)
+
+    def test_mixed_content_file(self):
+        # Test extraction from a file with mixed content (code and comments)
+        mixed_content_comments = extract_comments_from_file('test_files/test_mixed_content.rb')
+        self.assertIn("# Ruby single-line comment", mixed_content_comments)
+        self.assertIn("=begin", mixed_content_comments)
+        self.assertIn("=end", mixed_content_comments)
+
 if __name__ == '__main__':
     unittest.main()
