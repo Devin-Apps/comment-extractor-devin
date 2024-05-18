@@ -1,9 +1,10 @@
 import re
 from pygments import lexers
 from pygments.token import Comment
-from comment_parser import comment_parser, UnsupportedError
+from comment_parser import comment_parser
+from comment_parser.comment_parser import UnsupportedError
 
-def extract_comments(file_path):
+def extract_comments_from_file(file_path):
     # Determine the lexer for the given file based on its extension
     try:
         lexer = lexers.get_lexer_for_filename(file_path)
@@ -33,5 +34,20 @@ def extract_comments(file_path):
         comments.extend([comment.text() for comment in parsed_comments])
     except UnsupportedError:
         pass  # If the language is not supported by comment_parser, just ignore
+
+    # Handle Python multiline comments (docstrings) which may not be captured by the lexer
+    if lexer.name == 'Python':
+        docstring_pattern = r'(\'\'\'[\s\S]*?\'\'\'|"""[\s\S]*?""")'
+        docstrings = re.findall(docstring_pattern, content, re.MULTILINE)
+        comments.extend(docstrings)
+
+    # Handle JavaScript comments which may not be captured by the lexer
+    if lexer.name == 'JavaScript':
+        single_line_comment_pattern = r'//.*'
+        multi_line_comment_pattern = r'/\*[\s\S]*?\*/'
+        single_line_comments = re.findall(single_line_comment_pattern, content)
+        multi_line_comments = re.findall(multi_line_comment_pattern, content)
+        comments.extend(single_line_comments)
+        comments.extend(multi_line_comments)
 
     return comments
